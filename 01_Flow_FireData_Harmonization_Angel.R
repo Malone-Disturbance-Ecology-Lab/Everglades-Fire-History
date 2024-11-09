@@ -24,7 +24,7 @@ librarian::shelf(sf, tidyverse, gtools, splitstackshape)
 # We make years >= 2011  match this format before applying additional edits to all years
 # Variables Harmonized:Fire_ID, Fire_Number, Fire_Name, DISC_DATE, DECLED_DATE, YEAR_, Fire_Type
 
-# IMPORT ALL ENP SHAPEFILES (1948-2020) -------------
+# IMPORT ALL EVER SHAPEFILES (1948-2020) -------------
 
 folder_EVER <- "EVER_FIRE PERIMETERS_original"
 
@@ -71,3 +71,88 @@ for (i in 1:length(raw_files_EVER)){
   # Add to list
   shp_list_EVER[[raw_file_name]] <- shp
 }
+
+# COMBINING ALL EVER SHAPEFILES ----------------------
+
+years_2018_2020 <- c("EVER_FIRES_2018.shp", "EVER_FIRES_2019.shp", "EVER_FIRES_2020.shp")
+
+years_1948_2017 <- setdiff(raw_files_EVER, years_2018_2020)
+
+# For each shapefile...
+for (i in 1:length(shp_list_EVER)){
+  # Grab its name
+  file_name <- names(shp_list_EVER[i])
+  
+  # If the file is from years 1948 through 2017...
+  if (file_name %in% years_1948_2017){
+    shp_list_EVER[[file_name]] <- shp_list_EVER[[file_name]] %>%
+      # Select relevant columns
+      select(FIRE_ID, FIRE_NUM, FIRE_NAME, YEAR_, DISC_DATE, DECLD_DATE, FIRE_TYPE) %>%
+      # Standardize column names
+      rename(Fire_ID = FIRE_ID) %>%
+      rename(Fire_Number = FIRE_NUM) %>%
+      rename(Fire_Name = FIRE_NAME) %>%
+      rename(Year = YEAR_) %>%
+      rename(Disc_Date = DISC_DATE) %>%
+      rename(Decld_Date = DECLD_DATE) %>%
+      rename(Fire_Type = FIRE_TYPE)  %>%
+      # Create a new column to denote the shapefile where the data came from
+      mutate(File_Name = file_name, .before = Fire_ID) %>%
+      # Make all columns into character columns
+      mutate(dplyr::across(.cols = -c(geometry), .fns = as.character))
+  }
+  
+  # If the file is from 2018 or 2019...
+  if (file_name == "EVER_FIRES_2018.shp" | file_name == "EVER_FIRES_2019.shp"){
+    shp_list_EVER[[file_name]] <- shp_list_EVER[[file_name]] %>%
+      # Select relevant columns
+      select(UniqueFire, LocalIncid, FIRE_NAME, YEAR, DISC_DATE, FireOutDat, FIRE_TYPE) %>%
+      # Standardize column names
+      rename(Fire_ID = UniqueFire) %>%
+      rename(Fire_Number = LocalIncid) %>%
+      rename(Fire_Name = FIRE_NAME) %>%
+      rename(Year = YEAR) %>%
+      rename(Disc_Date = DISC_DATE) %>%
+      rename(Decld_Date = FireOutDat) %>%
+      rename(Fire_Type = FIRE_TYPE) %>%
+      # Create a new column to denote the shapefile where the data came from
+      mutate(File_Name = file_name, .before = Fire_ID) %>%
+      # Make all columns into character columns
+      mutate(dplyr::across(.cols = -c(geometry), .fns = as.character))
+  }
+  
+  # If the file is from 2020...
+  if (file_name == "EVER_FIRES_2020.shp") {
+    shp_list_EVER[[file_name]] <- shp_list_EVER[[file_name]] %>%
+      # Select relevant columns
+      select(FIRE_ID, FIRE_NUM, FIRE_NAME, CY_YEAR, DISC_DATE, DECLD_DATE, Incident_t, fire_cause) %>%
+      # Standardize column names
+      rename(Fire_ID = FIRE_ID) %>%
+      rename(Fire_Number = FIRE_NUM) %>%
+      rename(Fire_Name = FIRE_NAME) %>%
+      rename(Year = CY_YEAR) %>%
+      rename(Disc_Date = DISC_DATE) %>%
+      rename(Decld_Date = DECLD_DATE) %>%
+      # Make a new Fire_Type column according to these conditions:
+      mutate(Fire_Type = case_when(
+        # When Incident_t is "WF" or "FU", set the value to "11
+        Incident_t == "WF" | Incident_t == "FU" ~ "11",
+        # When Incident_t is "RX" and fire_cause is "Management", set the value to "48"
+        Incident_t == "RX" & fire_cause == "Management" ~ "48",
+        # When Incident_t is "RX" and fire_cause is not "Management", set the value to "11"
+        Incident_t == "RX" & fire_cause != "Management" ~ "11",
+      )) %>%
+      # Drop Incident_t and fire_cause columns
+      select(-Incident_t, -fire_cause) %>%
+      # Create a new column to denote the shapefile where the data came from
+      mutate(File_Name = file_name, .before = Fire_ID) %>%
+      # Make all columns into character columns
+      mutate(dplyr::across(.cols = -c(geometry), .fns = as.character))
+  }
+}
+
+# Unlist the list we generated from above
+tidy_v0_EVER <- shp_list_EVER %>%
+  purrr::list_rbind(x = .)
+
+# RESOLVING REMAINING DATE FORMAT ISSUE -------------
