@@ -156,3 +156,30 @@ tidy_v0_EVER <- shp_list_EVER %>%
   purrr::list_rbind(x = .)
 
 # RESOLVING REMAINING DATE FORMAT ISSUE -------------
+
+tidy_v1_EVER <- tidy_v0_EVER %>%
+  mutate(Decld_Date = case_when(
+    # Fix wrong dates in Decld_Date column
+    File_Name == "EVER_FIRES_1955.shp" & stringr::str_detect(Decld_Date, "16550404") ~ "19550404",
+    File_Name == "EVER_FIRES_1959.shp" & stringr::str_detect(Decld_Date, "21568") ~ "19590215",
+    File_Name == "EVER_FIRES_1962.shp" & stringr::str_detect(Decld_Date, "16920310") ~ "19620310",
+    File_Name == "EVER_FIRES_1996.shp" & stringr::str_detect(Decld_Date, "19962119") ~ "19961219",
+    File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Decld_Date, "20170852") ~ "20170825",
+    File_Name == "EVER_FIRES_2018.shp" & Fire_ID == "2018-FLEVP-18039" ~ "2018/03/24",
+    File_Name == "EVER_FIRES_2018.shp" & Fire_ID == "2018-FLEVP-18063" ~ "2018/07/09",
+    # If Decld_Date is 0, set to NA
+    Decld_Date == "0" ~ NA,
+    T ~ Decld_Date
+  )) %>%
+  mutate(Year = case_when(
+    # Fix wrong years in the Year column
+    File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Year, "0") ~ "2017",
+    File_Name == "EVER_FIRES_2018.shp" & stringr::str_detect(Year, "2017") ~ "2018",
+    T ~ Year
+  )) %>%
+  mutate(Disc_Date = case_when(
+    # If Disc_Date is 0, set to NA
+    Disc_Date == "0" ~ NA,
+    T ~ Disc_Date
+  ))
+
