@@ -135,7 +135,7 @@ for (i in 1:length(shp_list_EVER)){
       rename(Decld_Date = DECLD_DATE) %>%
       # Make a new Fire_Type column according to these conditions:
       mutate(Fire_Type = case_when(
-        # When Incident_t is "WF" or "FU", set the value to "11
+        # When Incident_t is "WF" or "FU", set the value to "11"
         Incident_t == "WF" | Incident_t == "FU" ~ "11",
         # When Incident_t is "RX" and fire_cause is "Management", set the value to "48"
         Incident_t == "RX" & fire_cause == "Management" ~ "48",
@@ -161,31 +161,31 @@ tidy_v1_EVER <- tidy_v0_EVER %>%
   mutate(Decld_Date = case_when(
     # Fix wrong dates in Decld_Date column
     # For example, in the 1955 shapefile, change the Decld_Date from "16550404" to "19550404"
-    File_Name == "EVER_FIRES_1955.shp" & stringr::str_detect(Decld_Date, "16550404") ~ "19550404",
-    File_Name == "EVER_FIRES_1959.shp" & stringr::str_detect(Decld_Date, "21568") ~ "19590215",
-    File_Name == "EVER_FIRES_1962.shp" & stringr::str_detect(Decld_Date, "16920310") ~ "19620310",
-    File_Name == "EVER_FIRES_1973.shp" & stringr::str_detect(Decld_Date, "197301280") ~ "19730128",
-    File_Name == "EVER_FIRES_1996.shp" & stringr::str_detect(Decld_Date, "19962119") ~ "19961219",
-    File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Decld_Date, "20170852") ~ "20170825",
-    File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Decld_Date, "32820170") ~ "3282017",
+    File_Name == "EVER_FIRES_1955.shp" & Decld_Date == "16550404" ~ "19550404",
+    File_Name == "EVER_FIRES_1959.shp" & Decld_Date == "21568" ~ "19590215",
+    File_Name == "EVER_FIRES_1962.shp" & Decld_Date == "16920310" ~ "19620310",
+    File_Name == "EVER_FIRES_1973.shp" & Decld_Date == "197301280" ~ "19730128",
+    File_Name == "EVER_FIRES_1996.shp" & Decld_Date == "19962119" ~ "19961219",
+    File_Name == "EVER_FIRES_2017.shp" & Decld_Date == "20170852" ~ "20170825",
+    File_Name == "EVER_FIRES_2017.shp" & Decld_Date == "32820170" ~ "3282017",
     File_Name == "EVER_FIRES_2018.shp" & Fire_ID == "2018-FLEVP-18039" ~ "2018/03/24",
     File_Name == "EVER_FIRES_2018.shp" & Fire_ID == "2018-FLEVP-18063" ~ "2018/07/09",
-    File_Name == "EVER_FIRES_2020.shp" & stringr::str_detect(Decld_Date, "2020705") ~ "20200705",
-    File_Name == "EVER_FIRES_2020.shp" & stringr::str_detect(Decld_Date, "2020728") ~ "20200728",
+    File_Name == "EVER_FIRES_2020.shp" & Decld_Date == "2020705" ~ "20200705",
+    File_Name == "EVER_FIRES_2020.shp" & Decld_Date == "2020728" ~ "20200728",
     # If Decld_Date is 0, set to NA
     Decld_Date == "0" ~ NA,
     T ~ Decld_Date
   )) %>%
   mutate(Year = case_when(
     # Fix wrong years in the Year column
-    File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Year, "0") ~ "2017",
-    File_Name == "EVER_FIRES_2018.shp" & stringr::str_detect(Year, "2017") ~ "2018",
+    File_Name == "EVER_FIRES_2017.shp" & Year == "0" ~ "2017",
+    File_Name == "EVER_FIRES_2018.shp" & Year == "2017" ~ "2018",
     T ~ Year
   )) %>%
   mutate(Disc_Date = case_when(
     # Fix wrong dates in Disc_Date column
-    File_Name == "EVER_FIRES_2020.shp" & stringr::str_detect(Disc_Date, "2020324") ~ "20200324",
-    File_Name == "EVER_FIRES_2020.shp" & stringr::str_detect(Disc_Date, "2020704") ~ "20200704",
+    File_Name == "EVER_FIRES_2020.shp" & Disc_Date == "2020324" ~ "20200324",
+    File_Name == "EVER_FIRES_2020.shp" & Disc_Date == "2020704" ~ "20200704",
     # If Disc_Date is 0, set to NA
     Disc_Date == "0" ~ NA,
     T ~ Disc_Date
