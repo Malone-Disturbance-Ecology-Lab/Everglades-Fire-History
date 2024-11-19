@@ -160,13 +160,18 @@ tidy_v0_EVER <- shp_list_EVER %>%
 tidy_v1_EVER <- tidy_v0_EVER %>%
   mutate(Decld_Date = case_when(
     # Fix wrong dates in Decld_Date column
+    # For example, in the 1955 shapefile, change the Decld_Date from "16550404" to "19550404"
     File_Name == "EVER_FIRES_1955.shp" & stringr::str_detect(Decld_Date, "16550404") ~ "19550404",
     File_Name == "EVER_FIRES_1959.shp" & stringr::str_detect(Decld_Date, "21568") ~ "19590215",
     File_Name == "EVER_FIRES_1962.shp" & stringr::str_detect(Decld_Date, "16920310") ~ "19620310",
+    File_Name == "EVER_FIRES_1973.shp" & stringr::str_detect(Decld_Date, "197301280") ~ "19730128",
     File_Name == "EVER_FIRES_1996.shp" & stringr::str_detect(Decld_Date, "19962119") ~ "19961219",
     File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Decld_Date, "20170852") ~ "20170825",
+    File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Decld_Date, "32820170") ~ "3282017",
     File_Name == "EVER_FIRES_2018.shp" & Fire_ID == "2018-FLEVP-18039" ~ "2018/03/24",
     File_Name == "EVER_FIRES_2018.shp" & Fire_ID == "2018-FLEVP-18063" ~ "2018/07/09",
+    File_Name == "EVER_FIRES_2020.shp" & stringr::str_detect(Decld_Date, "2020705") ~ "20200705",
+    File_Name == "EVER_FIRES_2020.shp" & stringr::str_detect(Decld_Date, "2020728") ~ "20200728",
     # If Decld_Date is 0, set to NA
     Decld_Date == "0" ~ NA,
     T ~ Decld_Date
@@ -178,8 +183,86 @@ tidy_v1_EVER <- tidy_v0_EVER %>%
     T ~ Year
   )) %>%
   mutate(Disc_Date = case_when(
+    # Fix wrong dates in Disc_Date column
+    File_Name == "EVER_FIRES_2020.shp" & stringr::str_detect(Disc_Date, "2020324") ~ "20200324",
+    File_Name == "EVER_FIRES_2020.shp" & stringr::str_detect(Disc_Date, "2020704") ~ "20200704",
     # If Disc_Date is 0, set to NA
     Disc_Date == "0" ~ NA,
     T ~ Disc_Date
+  )) %>%
+  mutate(Fire_Type = case_when(
+    # If Fire_Type is 48, change it to RX,
+    # Otherwise if it's not NA, change it to WF
+    Fire_Type == "48" ~ "RX",
+    !is.na(Fire_Type) ~ "WF",
+    T ~ Fire_Type
   ))
+
+# The 2016-2019 shapefiles have different date formats in their Disc_Date and Decld_Date columns
+# These need to be changed to YYYYMMDD like the rest of the files
+tidy_v2_EVER <- tidy_v1_EVER %>%
+  mutate(date_format = case_when(
+    # Create a new date_format column that denotes each file's date formats
+    File_Name == "EVER_FIRES_2016.shp" ~ "MMDDYYYY",
+    File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Disc_Date, "2017$") ~ "MMDDYYYY",
+    File_Name == "EVER_FIRES_2017.shp" & stringr::str_detect(Disc_Date, "^2017") ~ "YYYYMMDD",
+    File_Name == "EVER_FIRES_2018.shp" | File_Name == "EVER_FIRES_2019.shp" ~ "YYYY/MM/DD",
+    T ~ "YYYYMMDD"
+  )) %>%
+  mutate(year_fix_disc = case_when(
+    # Create a new year_fix_disc column that contains the year from rows that have MMDDYYYY format
+    date_format == "MMDDYYYY" ~ stringr::str_extract(Disc_Date, "[:digit:]{4}$"),
+  )) %>%
+  mutate(year_fix_decld = case_when(
+    # Create a new year_fix_decld column that contains the year from rows that have MMDDYYYY format
+    date_format == "MMDDYYYY" ~ stringr::str_extract(Decld_Date, "[:digit:]{4}$"),
+  )) %>%
+  mutate(month_fix_disc = case_when(
+    # Create a new month_fix_disc column that contains the month from rows that have MMDDYYYY format
+    date_format == "MMDDYYYY" & nchar(Disc_Date) == 7 ~ paste0("0", stringr::str_extract(Disc_Date, "^[:digit:]{1}")),
+    date_format == "MMDDYYYY" & nchar(Disc_Date) == 8 ~ stringr::str_extract(Disc_Date, "^[:digit:]{2}"),
+  )) %>%
+  mutate(month_fix_decld = case_when(
+    # Create a new month_fix_decld column that contains the month from rows that have MMDDYYYY format
+    date_format == "MMDDYYYY" & nchar(Decld_Date) == 7 ~ paste0("0", stringr::str_extract(Decld_Date, "^[:digit:]{1}")),
+    date_format == "MMDDYYYY" & nchar(Decld_Date) == 8 ~ stringr::str_extract(Decld_Date, "^[:digit:]{2}"),
+  )) %>%
+  mutate(day_fix_disc = case_when(
+    # Create a new day_fix_disc column that contains the MMDD from rows that have MMDDYYYY
+    date_format == "MMDDYYYY" ~ stringr::str_replace(Disc_Date, "[:digit:]{4}$", ""),
+  )) %>%
+  mutate(day_fix_disc = case_when(
+    # Edit the day_fix_disc column to contain the day from rows that have MMDDYYYY format
+    date_format == "MMDDYYYY" ~ stringr::str_extract(day_fix_disc, "[:digit:]{2}$"),
+  )) %>%
+  mutate(day_fix_decld = case_when(
+    # Create a new day_fix_decld column that contains the MMDD from rows that have MMDDYYYY
+    date_format == "MMDDYYYY" ~ stringr::str_replace(Decld_Date, "[:digit:]{4}$", ""),
+  )) %>%
+  mutate(day_fix_decld = case_when(
+    # Edit the day_fix_decld column to contain the day from rows that have MMDDYYYY format
+    date_format == "MMDDYYYY" ~ stringr::str_extract(day_fix_decld, "[:digit:]{2}$"),
+  )) %>%
+  mutate(Disc_Date_fix = case_when(
+    # Create a Disc_Date_fix that contains the fixed discovered date in YYYYMMDD format 
+    date_format == "MMDDYYYY" ~ paste0(year_fix_disc, month_fix_disc, day_fix_disc),
+    date_format == "YYYY/MM/DD" ~ stringr::str_replace_all(Disc_Date, "/", ""),
+    T ~ Disc_Date
+  ), .after = Disc_Date) %>%
+  mutate(Decld_Date_fix = case_when(
+    # Create a Decld_Date_fix that contains the fixed declined date in YYYYMMDD format 
+    date_format == "MMDDYYYY" ~ paste0(year_fix_decld, month_fix_decld, day_fix_decld),
+    date_format == "YYYY/MM/DD" ~ stringr::str_replace_all(Decld_Date, "/", ""),
+    T ~ Decld_Date
+  ), .after = Decld_Date) %>%
+  # Drop unneeded columns
+  select(-Disc_Date, -Decld_Date, -date_format,
+         -year_fix_disc, -month_fix_disc, -day_fix_disc,
+         -year_fix_decld, -month_fix_decld, -day_fix_decld) %>%
+  # Rename the fixed columns 
+  rename(Disc_Date = Disc_Date_fix) %>%
+  rename(Decld_Date = Decld_Date_fix) %>%
+  # Convert all dates into proper Date columns
+  mutate(Disc_Date = readr::parse_date(Disc_Date, "%Y%m%d"),
+         Decld_Date = readr::parse_date(Decld_Date, "%Y%m%d"))
 
