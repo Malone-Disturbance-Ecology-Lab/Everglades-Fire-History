@@ -266,3 +266,84 @@ tidy_v2_EVER <- tidy_v1_EVER %>%
   mutate(Disc_Date = readr::parse_date(Disc_Date, "%Y%m%d"),
          Decld_Date = readr::parse_date(Decld_Date, "%Y%m%d"))
 
+## ----------------------------------------------- ##
+# FIXING ISSUES WITH BIG CYPRESS FIRE DATA (BICY) ----
+## ----------------------------------------------- ##
+
+# IMPORT BICY SHAPEFILE (1978-2021) -------------
+
+folder_BICY <- "BICY_FIRE_Perimeter_original"
+
+# Identify relevant BICY file
+( raw_file_BICY <- dir(path = folder_BICY, "*.shp$") ) 
+
+# Read in shapefile
+tidy_v0_BICY <- read_sf(file.path(folder_BICY, raw_file_BICY)) %>%
+  # Transform to WGS84
+  st_transform("EPSG:4326") %>%
+  # Make valid
+  st_make_valid()
+
+# FORMAT COLUMNS TO MATCH EVERGLADES -------------
+
+tidy_v1_BICY <- tidy_v0_BICY %>%
+  # Select relevant columns
+  select(FIRE_ID, FireNumber, FireName, CalendYear, StartDate, EndDate, FireType) %>%
+  # Standardize column names
+  rename(Fire_ID = FIRE_ID) %>%
+  rename(Fire_Number = FireNumber) %>%
+  rename(Fire_Name = FireName) %>%
+  rename(Year = CalendYear) %>%
+  rename(Disc_Date = StartDate) %>%
+  rename(Decld_Date = EndDate) %>%
+  rename(Fire_Type = FireType) %>%
+  # Edit Fire_Type column according to these conditions:
+  mutate(Fire_Type = case_when(
+    # When Fire_Type is "Wildland", "Other", "Unknown", "Vehicle Fire", "Fire Use", or "Chemical", set the value to "WF"
+    Fire_Type %in% c("Wildland", "Other", "Unknown",
+                     "Vehicle Fire", "Fire Use", "Chemical") ~ "WF",
+    # When Fire_Type is "Prescribed", "Burn Area", or "Mechanical", set the value to "RX"
+    Fire_Type %in% c("Prescribed", "Burn Area", "Mechanical") ~ "RX"
+  )) %>%
+  # Create a new column to denote the shapefile where the data came from
+  mutate(File_Name = raw_file_BICY, .before = Fire_ID) %>%
+  # Make all columns into character columns
+  mutate(dplyr::across(.cols = -c(geometry), .fns = as.character))
+  
+# RESOLVING REMAINING DATE FORMAT ISSUE -------------
+
+tidy_v2_BICY <- tidy_v1_BICY %>%
+  mutate(Disc_Date = case_when(
+    # Fix wrong dates in Disc_Date column
+    Disc_Date == "1981/0208" ~ "1981/02/08",
+    Disc_Date == "198/103/29" ~ "1981/03/29",
+    Disc_Date == "1981/0729" ~ "1981/07/29",
+    Disc_Date == "1982/0109" ~ "1982/01/09",
+    Disc_Date == "0//" ~ NA,
+    Disc_Date == "2003/09/" ~ "",
+    Disc_Date == "2003/07/" ~ "",
+    Disc_Date == "2007/05" ~ "",
+    Disc_Date == "1998/02/29" ~ "1998/03/01",
+    Disc_Date == "2012/0201" ~ "2012/02/01",
+    Disc_Date == "2014/05/xx" ~ "",
+    Disc_Date == "2014/06/xx" ~ "",
+    T ~ Disc_Date
+  )) %>%
+  mutate(Decld_Date = case_when(
+    # Fix wrong dates in Decld_Date column
+    Decld_Date == "7/16/2020" ~ "2020/07/16",
+    Decld_Date == "07/14/2020" ~ "2020/07/14",
+    Decld_Date == "07/16/2020" ~ "2020/07/16",
+    Decld_Date == "1981/03/39" ~ "1981/03/29",
+    Decld_Date == "0//" ~ NA,
+    Decld_Date == "200/02/15" ~ "2000/02/15",
+    Decld_Date == "2006/15/13" ~ "2006/05/13",
+    Decld_Date == "2016/06/xx" ~ "",
+    Decld_Date == "2016/10/xx" ~ "",
+    Decld_Date == "2017/" ~ "",
+    Decld_Date == "2021/09/31" ~ "2021/10/01",
+    T ~ Decld_Date
+  )) %>%
+  # Convert all dates into proper Date columns
+  mutate(Disc_Date = readr::parse_date(Disc_Date, "%Y/%m/%d"),
+         Decld_Date = readr::parse_date(Decld_Date, "%Y/%m/%d"))
