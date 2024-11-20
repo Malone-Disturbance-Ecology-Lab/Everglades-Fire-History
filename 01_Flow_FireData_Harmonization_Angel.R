@@ -13,7 +13,7 @@
 # Load necessary libraries
 # If you don't have the "librarian" package, uncomment the next line and run it to install the package
 # install.packages("librarian")
-librarian::shelf(sf, tidyverse, gtools, splitstackshape)
+librarian::shelf(sf, tidyverse)
 
 ## ----------------------------------------------- ##
 # FIXING ISSUES WITH EVERGLADES NP DATA (EVER) ----
@@ -22,7 +22,7 @@ librarian::shelf(sf, tidyverse, gtools, splitstackshape)
 # Some years have different columns and other issues. These issues are resolved below
 # 1948-2010 are formatted the same.
 # We make years >= 2011  match this format before applying additional edits to all years
-# Variables Harmonized:Fire_ID, Fire_Number, Fire_Name, DISC_DATE, DECLED_DATE, YEAR_, Fire_Type
+# Variables Harmonized: File_Name, Fire_ID, Fire_Number, Fire_Name, Year, Disc_Date, Decld_Date, Fire_Type
 
 # IMPORT ALL EVER SHAPEFILES (1948-2020) -------------
 
