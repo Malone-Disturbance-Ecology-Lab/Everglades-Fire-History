@@ -264,7 +264,9 @@ tidy_v2_EVER <- tidy_v1_EVER %>%
   rename(Decld_Date = Decld_Date_fix) %>%
   # Convert all dates into proper Date columns
   mutate(Disc_Date = readr::parse_date(Disc_Date, "%Y%m%d"),
-         Decld_Date = readr::parse_date(Decld_Date, "%Y%m%d"))
+         Decld_Date = readr::parse_date(Decld_Date, "%Y%m%d")) %>%
+  # Convert Year to a numeric column
+  mutate(Year = as.numeric(Year))
 
 ## ----------------------------------------------- ##
 # FIXING ISSUES WITH BIG CYPRESS FIRE DATA (BICY) ----
@@ -346,4 +348,19 @@ tidy_v2_BICY <- tidy_v1_BICY %>%
   )) %>%
   # Convert all dates into proper Date columns
   mutate(Disc_Date = readr::parse_date(Disc_Date, "%Y/%m/%d"),
-         Decld_Date = readr::parse_date(Decld_Date, "%Y/%m/%d"))
+         Decld_Date = readr::parse_date(Decld_Date, "%Y/%m/%d")) %>%
+  # Convert Year to a numeric column
+  mutate(Year = as.numeric(Year))
+
+
+## ------------------------------------------------------------ ##
+# COMBINING REGIONS (EVER and BICY) FOR ALL EVERGLADES FIRES (EVG) 
+## ------------------------------------------------------------ ##
+
+# Clip EVER fire dataset down to same timeframe as BICY (1978-2021)
+tidy_v3_EVER <- tidy_v2_EVER %>%
+  filter(Year >= 1978)
+
+# Combine EVER and BICY shapefiles together
+tidy_v0_EVER_BICY <- tidy_v3_EVER %>%
+  bind_rows(tidy_v2_BICY)
