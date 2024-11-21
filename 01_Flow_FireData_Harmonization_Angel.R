@@ -32,7 +32,7 @@ folder_EVER <- "EVER_FIRE PERIMETERS_original"
 ( raw_files_EVER <- dir(path = folder_EVER, "*.shp$") ) 
 
 # Specify the files we don't want
-not_wanted_EVER <- c("EVER_Fires_2021.shp")
+not_wanted_EVER <- c("")
 
 # Remove the unwanted files from our vector
 raw_files_EVER <- raw_files_EVER[! raw_files_EVER %in% not_wanted_EVER]
@@ -48,8 +48,8 @@ for (i in 1:length(raw_files_EVER)){
   
   message(paste0("Reading ", raw_file_name))
   
-  # If the file name is "EVER_FIRES_2020.shp"...
-  if (raw_file_name == "EVER_FIRES_2020.shp"){
+  # If the file name is "EVER_FIRES_2020.shp" or "EVER_Fires_2021.shp"...
+  if (raw_file_name == "EVER_FIRES_2020.shp" | raw_file_name == "EVER_Fires_2021.shp"){
     # Read in shapefile
     shp <- read_sf(file.path(folder_EVER, raw_files_EVER[i])) %>% 
       # Drop Z dimension
@@ -74,9 +74,9 @@ for (i in 1:length(raw_files_EVER)){
 
 # COMBINING ALL EVER SHAPEFILES ----------------------
 
-years_2018_2020 <- c("EVER_FIRES_2018.shp", "EVER_FIRES_2019.shp", "EVER_FIRES_2020.shp")
+years_2018_2021 <- c("EVER_FIRES_2018.shp", "EVER_FIRES_2019.shp", "EVER_FIRES_2020.shp", "EVER_Fires_2021.shp")
 
-years_1948_2017 <- setdiff(raw_files_EVER, years_2018_2020)
+years_1948_2017 <- setdiff(raw_files_EVER, years_2018_2021)
 
 # For each shapefile...
 for (i in 1:length(shp_list_EVER)){
@@ -121,8 +121,8 @@ for (i in 1:length(shp_list_EVER)){
       mutate(dplyr::across(.cols = -c(geometry), .fns = as.character))
   }
   
-  # If the file is from 2020...
-  if (file_name == "EVER_FIRES_2020.shp") {
+  # If the file is from 2020 or 2021...
+  if (file_name == "EVER_FIRES_2020.shp" | file_name == "EVER_Fires_2021.shp") {
     shp_list_EVER[[file_name]] <- shp_list_EVER[[file_name]] %>%
       # Select relevant columns
       select(FIRE_ID, FIRE_NUM, FIRE_NAME, CY_YEAR, DISC_DATE, DECLD_DATE, Incident_t, fire_cause) %>%
@@ -172,6 +172,8 @@ tidy_v1_EVER <- tidy_v0_EVER %>%
     File_Name == "EVER_FIRES_2018.shp" & Fire_ID == "2018-FLEVP-18063" ~ "2018/07/09",
     File_Name == "EVER_FIRES_2020.shp" & Decld_Date == "2020705" ~ "20200705",
     File_Name == "EVER_FIRES_2020.shp" & Decld_Date == "2020728" ~ "20200728",
+    File_Name == "EVER_Fires_2021.shp" & Decld_Date == "4292021" ~ "20210429",
+    File_Name == "EVER_Fires_2021.shp" & Decld_Date == "7262021" ~ "20210726",
     # If Decld_Date is 0, set to NA
     Decld_Date == "0" ~ NA,
     T ~ Decld_Date
@@ -370,4 +372,5 @@ tidy_v3_EVER <- tidy_v2_EVER %>%
 
 # Combine EVER and BICY shapefiles together
 tidy_v0_EVER_BICY <- tidy_v3_EVER %>%
-  bind_rows(tidy_v2_BICY)
+  bind_rows(tidy_v2_BICY) %>%
+  relocate(Date_Flag, .after = Decld_Date)
