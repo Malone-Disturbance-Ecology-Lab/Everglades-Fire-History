@@ -315,6 +315,13 @@ tidy_v1_BICY <- tidy_v0_BICY %>%
 # RESOLVING REMAINING DATE FORMAT ISSUE -------------
 
 tidy_v2_BICY <- tidy_v1_BICY %>%
+  # Create a flag for missing start/end days
+  mutate(Date_Flag = case_when(
+    Disc_Date %in% c("2003/09/", "2003/07/", "2007/05",
+                     "2014/05/xx", "2014/06/xx") ~ "Missing exact start day, so it has been set to the last day of the month",
+    Decld_Date %in% c("2016/06/xx", "2016/10/xx") ~ "Missing exact end day, so it has been set to the last day of the month",
+    T ~ NA
+  ), .after = Decld_Date) %>%
   mutate(Disc_Date = case_when(
     # Fix wrong dates in Disc_Date column
     Disc_Date == "1981/0208" ~ "1981/02/08",
@@ -322,13 +329,13 @@ tidy_v2_BICY <- tidy_v1_BICY %>%
     Disc_Date == "1981/0729" ~ "1981/07/29",
     Disc_Date == "1982/0109" ~ "1982/01/09",
     Disc_Date == "0//" ~ NA,
-    Disc_Date == "2003/09/" ~ "",
-    Disc_Date == "2003/07/" ~ "",
-    Disc_Date == "2007/05" ~ "",
+    Disc_Date == "2003/09/" ~ "2003/09/30",
+    Disc_Date == "2003/07/" ~ "2003/07/31",
+    Disc_Date == "2007/05" ~ "2007/05/31",
     Disc_Date == "1998/02/29" ~ "1998/03/01",
     Disc_Date == "2012/0201" ~ "2012/02/01",
-    Disc_Date == "2014/05/xx" ~ "",
-    Disc_Date == "2014/06/xx" ~ "",
+    Disc_Date == "2014/05/xx" ~ "2014/05/31",
+    Disc_Date == "2014/06/xx" ~ "2014/06/30",
     T ~ Disc_Date
   )) %>%
   mutate(Decld_Date = case_when(
@@ -340,9 +347,9 @@ tidy_v2_BICY <- tidy_v1_BICY %>%
     Decld_Date == "0//" ~ NA,
     Decld_Date == "200/02/15" ~ "2000/02/15",
     Decld_Date == "2006/15/13" ~ "2006/05/13",
-    Decld_Date == "2016/06/xx" ~ "",
-    Decld_Date == "2016/10/xx" ~ "",
-    Decld_Date == "2017/" ~ "",
+    Decld_Date == "2016/06/xx" ~ "2016/06/30",
+    Decld_Date == "2016/10/xx" ~ "2016/10/31",
+    Decld_Date == "2017/" ~ NA,
     Decld_Date == "2021/09/31" ~ "2021/10/01",
     T ~ Decld_Date
   )) %>%
