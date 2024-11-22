@@ -4,7 +4,7 @@
 # Script author(s): Angel Chen
 
 # Purpose:
-## This script cleans and combines fire history shapefiles from Everglades National Park (EVER 1948-2020) and Big Cypress National Preserve (BICY 1978-2020)
+## This script cleans and combines fire history shapefiles from Everglades National Park (EVER 1948-2021) and Big Cypress National Preserve (BICY 1978-2021)
 
 ## --------------------------------------------- ##
 #               Housekeeping -----
@@ -16,10 +16,10 @@
 librarian::shelf(sf, tidyverse)
 
 # Create necessary sub-folder(s)
-dir.create(path = file.path("tidy_perimeters"), showWarnings = F)
+dir.create(path = file.path("01_tidy_perimeters"), showWarnings = F)
 
 ## ----------------------------------------------- ##
-# FIXING ISSUES WITH EVERGLADES NP DATA (EVER) ----
+# Fixing Issues with Everglades NP Data (EVER) ----
 ## ----------------------------------------------- ##
 
 # Some years have different columns and other issues. These issues are resolved below
@@ -27,7 +27,7 @@ dir.create(path = file.path("tidy_perimeters"), showWarnings = F)
 # We make years >= 2011  match this format before applying additional edits to all years
 # Variables Harmonized: File_Name, Fire_ID, Fire_Number, Fire_Name, Year, Disc_Date, Decld_Date, Fire_Type
 
-# IMPORT ALL EVER SHAPEFILES (1948-2020) -------------
+# Import all EVER shapefiles (1948-2021) -------------
 
 folder_EVER <- "EVER_FIRE PERIMETERS_original"
 
@@ -75,7 +75,7 @@ for (i in 1:length(raw_files_EVER)){
   shp_list_EVER[[raw_file_name]] <- shp
 }
 
-# COMBINING ALL EVER SHAPEFILES ----------------------
+# Combining all EVER shapefiles ----------------------
 
 years_2018_2021 <- c("EVER_FIRES_2018.shp", "EVER_FIRES_2019.shp", "EVER_FIRES_2020.shp", "EVER_Fires_2021.shp")
 
@@ -158,7 +158,7 @@ for (i in 1:length(shp_list_EVER)){
 tidy_v0_EVER <- shp_list_EVER %>%
   purrr::list_rbind(x = .)
 
-# RESOLVING REMAINING DATE FORMAT ISSUE -------------
+# Resolving remaining date format issue -------------
 
 tidy_v1_EVER <- tidy_v0_EVER %>%
   dplyr::mutate(Decld_Date = dplyr::case_when(
@@ -274,10 +274,10 @@ tidy_v2_EVER <- tidy_v1_EVER %>%
   dplyr::mutate(Year = as.numeric(Year))
 
 ## ----------------------------------------------- ##
-# FIXING ISSUES WITH BIG CYPRESS FIRE DATA (BICY) ----
+# Fixing Issues with Big Cypress Fire Data (BICY) ----
 ## ----------------------------------------------- ##
 
-# IMPORT BICY SHAPEFILE (1978-2021) -------------
+# Import BICY shapefile (1978-2021) -------------
 
 folder_BICY <- "BICY_FIRE_Perimeter_original"
 
@@ -291,7 +291,7 @@ tidy_v0_BICY <- sf::read_sf(file.path(folder_BICY, raw_file_BICY)) %>%
   # Make valid
   sf::st_make_valid()
 
-# FORMAT COLUMNS TO MATCH EVERGLADES -------------
+# Format columns to match Everglades -------------
 
 tidy_v1_BICY <- tidy_v0_BICY %>%
   # Select relevant columns
@@ -317,7 +317,7 @@ tidy_v1_BICY <- tidy_v0_BICY %>%
   # Make all columns into character columns
   dplyr::mutate(dplyr::across(.cols = -c(geometry), .fns = as.character))
   
-# RESOLVING REMAINING DATE FORMAT ISSUE -------------
+# Resolving remaining date format issue -------------
 
 tidy_v2_BICY <- tidy_v1_BICY %>%
   # Create a flag for missing start/end days
@@ -366,7 +366,7 @@ tidy_v2_BICY <- tidy_v1_BICY %>%
 
 
 ## ------------------------------------------------------------ ##
-# COMBINING REGIONS (EVER and BICY) FOR ALL EVERGLADES FIRES (EVG) 
+# Combining Regions (EVER and BICY) for all Everglades Fires (EVG) 
 ## ------------------------------------------------------------ ##
 
 # Clip EVER fire dataset down to same timeframe as BICY (1978-2021)
@@ -379,4 +379,4 @@ tidy_v0_EVER_BICY <- tidy_v3_EVER %>%
   dplyr::relocate(Date_Flag, .after = Decld_Date)
 
 # Export harmonized tidy fire perimeters
-sf::st_write(tidy_v0_EVER_BICY, file.path("tidy_perimeters", "EVER_BICY_1978_2021_perim.shp"))
+sf::st_write(tidy_v0_EVER_BICY, file.path("01_tidy_perimeters", "EVER_BICY_1978_2021_perim.shp"))
