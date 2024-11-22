@@ -15,6 +15,9 @@
 # install.packages("librarian")
 librarian::shelf(sf, tidyverse)
 
+# Create necessary sub-folder(s)
+dir.create(path = file.path("tidy_perimeters"), showWarnings = F)
+
 ## ----------------------------------------------- ##
 # FIXING ISSUES WITH EVERGLADES NP DATA (EVER) ----
 ## ----------------------------------------------- ##
@@ -374,3 +377,6 @@ tidy_v3_EVER <- tidy_v2_EVER %>%
 tidy_v0_EVER_BICY <- tidy_v3_EVER %>%
   bind_rows(tidy_v2_BICY) %>%
   relocate(Date_Flag, .after = Decld_Date)
+
+# Export harmonized tidy fire perimeters
+st_write(tidy_v0_EVER_BICY, file.path("tidy_perimeters", "EVER_BICY_1978_2021_perim.shp"))
