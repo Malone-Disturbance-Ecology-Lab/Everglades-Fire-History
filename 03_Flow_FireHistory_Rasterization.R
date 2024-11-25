@@ -32,8 +32,7 @@ Uplands_raster <- terra::rast(file.path("02_tidy_uplands_raster", "Uplands_raste
 # Read in harmonized fire perimeter data
 EVER_BICY_1978_2021_perim <- terra::vect(file.path("01_tidy_perimeters", "EVER_BICY_1978_2021_perim.shp")) %>%
   # Transform to same CRS as uplands raster
-  terra::project(terra::crs(Uplands_raster)) %>%
-  dplyr::filter(Year == 1978 | Year == 1979)
+  terra::project(terra::crs(Uplands_raster)) 
 
 # Creating burned/unburned yearly rasters (1978-2021) -------------
 # (Used to calculate fire frequency)
