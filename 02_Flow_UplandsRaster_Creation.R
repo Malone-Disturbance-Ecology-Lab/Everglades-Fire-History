@@ -70,7 +70,9 @@ terra::plot(UpEco)
 Uplands_raster <- terra::rasterize(x = UpEco, y = Raster30x30, field = "value", fun = "sum", background = NA)
 
 # Check
-terra::plot(Uplands_raster)
+terra::plot(Raster30x30[[1]], reset = F)
+terra::plot(UpEco, add = T)
+terra::plot(Uplands_raster, add = T)
 
 # Export tidy uplands raster
 terra::writeRaster(Uplands_raster, file.path("02_tidy_uplands_raster", "Uplands_raster.tif"))
