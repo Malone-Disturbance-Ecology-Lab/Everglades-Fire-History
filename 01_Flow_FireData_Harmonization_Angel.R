@@ -15,9 +15,6 @@
 # install.packages("librarian")
 librarian::shelf(sf, tidyverse)
 
-# Create necessary sub-folder(s)
-dir.create(path = file.path("01_tidy_perimeters"), showWarnings = F)
-
 ## ----------------------------------------------- ##
 # Fixing Issues with Everglades NP Data (EVER) ----
 ## ----------------------------------------------- ##
@@ -379,4 +376,4 @@ tidy_v0_EVER_BICY <- tidy_v3_EVER %>%
   dplyr::relocate(Date_Flag, .after = Decld_Date)
 
 # Export harmonized tidy fire perimeters
-sf::st_write(tidy_v0_EVER_BICY, file.path("01_tidy_perimeters", "EVER_BICY_1978_2021_perim.shp"))
+sf::st_write(tidy_v0_EVER_BICY, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2021_perim.shp"))
