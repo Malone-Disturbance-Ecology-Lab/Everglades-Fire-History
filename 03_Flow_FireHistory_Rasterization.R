@@ -24,8 +24,11 @@ librarian::shelf(tidyterra, tidyverse)
 # Read in uplands raster
 Uplands_raster <- terra::rast(file.path("02_tidy_uplands_raster", "Uplands_raster.tif"))
 
+# Point to FireHistory folder on Malone Lab server
+firehist_folder <- file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory") 
+
 # Read in harmonized fire perimeter data
-EVER_BICY_1978_2021_perim <- terra::vect(file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2021_perim.shp")) %>%
+EVER_BICY_1978_2021_perim <- terra::vect(file.path(firehist_folder, "EVER_BICY_1978_2021_perim.shp")) %>%
   # Transform to same CRS as uplands raster
   terra::project(terra::crs(Uplands_raster)) 
 
@@ -60,7 +63,7 @@ for (a_year in unique(burned_EVER_BICY_1978_2021_perim$Year)){
 burned_rasters <- terra::rast(raster_list)
 
 # Export tidy burned rasters
-terra::writeRaster(burned_rasters, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2021_burned.tif"),
+terra::writeRaster(burned_rasters, file.path(firehist_folder, "EVER_BICY_1978_2021_burned.tif"),
                    overwrite = T)
 
 # Creating year of fire occurrence rasters (1978-2021) -------------
@@ -89,5 +92,5 @@ for (a_year in unique(EVER_BICY_1978_2021_perim$Year)){
 year_rasters <- terra::rast(raster_list2)
 
 # Export tidy year of fire occurrence rasters
-terra::writeRaster(year_rasters, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2021_year_occurrence.tif"),
+terra::writeRaster(year_rasters, file.path(firehist_folder, "EVER_BICY_1978_2021_year_occurrence.tif"),
                    overwrite = T)
