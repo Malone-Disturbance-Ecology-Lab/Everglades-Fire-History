@@ -4,9 +4,7 @@
 # Script author(s): Angel Chen
 
 # Purpose:
-## This script: 
-## 1. Rasterizes yearly fire history shapefile data 
-## 2. Extracts raster data to upland sample pts to generate fire history dataframes
+## This script rasterizes yearly fire history shapefile data 
 
 ## --------------------------------------------- ##
 #               Housekeeping -----
@@ -16,9 +14,6 @@
 # If you don't have the "librarian" package, uncomment the next line and run it to install the package
 # install.packages("librarian")
 librarian::shelf(tidyterra, tidyverse)
-
-# Create necessary sub-folder(s)
-dir.create(path = file.path("03_tidy_fire_history"), showWarnings = F)
 
 ## ----------------------------------------------- ##
 #       Creating Yearly Fire Rasters -----
@@ -96,53 +91,3 @@ year_rasters <- terra::rast(raster_list2)
 # Export tidy year of fire occurrence rasters
 terra::writeRaster(year_rasters, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2021_year_occurrence.tif"),
                    overwrite = T)
-
-## --------------------------------------------------------- ##
-#    Fire History Dataframe for Upland Sample Points -----
-## --------------------------------------------------------- ##
-
-# Point to folder containing sample points
-sample_folder <- file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "Grace_McLeod", "Sampling")
-
-# Load upland sample pts
-Sample_pts_upland <- terra::vect(file.path(sample_folder, "Sample_pts_upland.shp"))
-
-# Fire Frequency (for total fires) --------------------------
-
-# Read in the stack of burned rasters we just created
-EVER_BICY_1978_2021_burned <- terra::rast(file.path("03_tidy_fire_history", "EVER_BICY_1978_2021_burned.tif"))
-
-# Extract to sample pts
-FireHistory <- terra::extract(x = EVER_BICY_1978_2021_burned, y = Sample_pts_upland, 
-                              method = "simple", buffer = NULL, df = TRUE, sp = TRUE, factors = TRUE)
-
-FireHistory_df <- FireHistory %>%
-  # Convert to data frame
-  as.data.frame() %>%
-  # Replace all NA values with zeroes
-  dplyr::mutate(dplyr::across(.cols = -ID, .fns = ~dplyr::case_when(is.na(.) ~ 0, T ~ .))) %>%
-  # Calculate total fires from 1978 to 2021
-  dplyr::mutate(freq_1978_2021 = rowSums(dplyr::across(.cols = -ID)),
-                # Calculate total fires from 2001 to 2007
-                freq_2001_2007 = rowSums(dplyr::across(burned_2001:burned_2007)),
-                # Calculate total fires from 2010 to 2021
-                freq_2010_2021 = rowSums(dplyr::across(burned_2010:burned_2021)))
-
-# Export as csv
-write_csv(FireHistory_df, file.path("03_tidy_fire_history", "FireHistory_df.csv"))
-
-# Fire Year (for time since fire) --------------------------
-
-# Read in the stack of year of occurrence rasters we just created
-EVER_BICY_1978_2021_year_occurrence <- terra::rast(file.path("03_tidy_fire_history", "EVER_BICY_1978_2021_year_occurrence.tif"))
-
-# Extract to sample pts
-FireYears <- terra::extract(x = EVER_BICY_1978_2021_year_occurrence, y = Sample_pts_upland,
-                            method = "simple", buffer = NULL, df = TRUE, sp = TRUE, factors = TRUE)
-
-FireYears_df <- FireYears %>%
-  # Convert to data frame
-  as.data.frame()
-
-# Export as csv
-write_csv(FireYears_df, file.path("03_tidy_fire_history", "FireYears_df.csv"))
