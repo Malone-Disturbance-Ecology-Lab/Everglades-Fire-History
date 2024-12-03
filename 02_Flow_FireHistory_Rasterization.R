@@ -22,7 +22,7 @@ librarian::shelf(tidyterra, tidyverse)
 # creates annual fire rasters for multiple variables using the EVG fire history shapefile data
 
 # Read in uplands raster
-Uplands_raster <- terra::rast(file.path("02_tidy_uplands_raster", "Uplands_raster.tif"))
+Uplands_raster <- terra::rast(file.path("Uplands_raster.tif"))
 
 # Point to FireHistory folder on Malone Lab server
 firehist_folder <- file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory") 
