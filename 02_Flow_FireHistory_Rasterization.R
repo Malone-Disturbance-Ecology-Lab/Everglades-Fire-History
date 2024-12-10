@@ -28,14 +28,14 @@ Uplands_raster <- terra::rast(file.path("Uplands_raster.tif"))
 firehist_folder <- file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory") 
 
 # Read in harmonized fire perimeter data
-EVER_BICY_1978_2021_perim <- terra::vect(file.path(firehist_folder, "EVER_BICY_1978_2021_perim.shp")) %>%
+EVER_BICY_1978_2023_perim <- terra::vect(file.path(firehist_folder, "EVER_BICY_1978_2023_perim.shp")) %>%
   # Transform to same CRS as uplands raster
   terra::project(terra::crs(Uplands_raster)) 
 
-# Creating burned/unburned yearly rasters (1978-2021) -------------
+# Creating burned/unburned yearly rasters (1978-2023) -------------
 # (Used to calculate fire frequency)
 
-burned_EVER_BICY_1978_2021_perim <- EVER_BICY_1978_2021_perim %>%
+burned_EVER_BICY_1978_2023_perim <- EVER_BICY_1978_2023_perim %>%
   # Create column to represent the the pixels occupied by that fire have "burned" and set it equal to 1
   dplyr::mutate(Burned = 1) 
 
@@ -43,12 +43,12 @@ burned_EVER_BICY_1978_2021_perim <- EVER_BICY_1978_2021_perim %>%
 raster_list <- list()
 
 # Create a loop to make annual burned/unburned rasters
-for (a_year in unique(burned_EVER_BICY_1978_2021_perim$Year)){
+for (a_year in unique(burned_EVER_BICY_1978_2023_perim$Year)){
   
   message(paste0("Rasterizing for year ", a_year))
   
   # Subsetting to one year
-  year_subset <- burned_EVER_BICY_1978_2021_perim %>%
+  year_subset <- burned_EVER_BICY_1978_2023_perim %>%
     dplyr::filter(Year == a_year)
   
   # Rasterize to Upland vegetation raster 
@@ -63,21 +63,21 @@ for (a_year in unique(burned_EVER_BICY_1978_2021_perim$Year)){
 burned_rasters <- terra::rast(raster_list)
 
 # Export tidy burned rasters
-terra::writeRaster(burned_rasters, file.path(firehist_folder, "EVER_BICY_1978_2021_burned.tif"),
+terra::writeRaster(burned_rasters, file.path(firehist_folder, "EVER_BICY_1978_2023_burned.tif"),
                    overwrite = T)
 
-# Creating year of fire occurrence rasters (1978-2021) -------------
+# Creating year of fire occurrence rasters (1978-2023) -------------
 
 # Create empty list to populate with rasters
 raster_list2 <- list()
 
 # Create a loop to make annual rasters for year of fire
-for (a_year in unique(EVER_BICY_1978_2021_perim$Year)){
+for (a_year in unique(EVER_BICY_1978_2023_perim$Year)){
   
   message(paste0("Rasterizing for year ", a_year))
   
   # Subsetting to one year
-  year_subset <- EVER_BICY_1978_2021_perim %>%
+  year_subset <- EVER_BICY_1978_2023_perim %>%
     dplyr::filter(Year == a_year)
   
   # Rasterize to Upland vegetation raster 
@@ -92,5 +92,5 @@ for (a_year in unique(EVER_BICY_1978_2021_perim$Year)){
 year_rasters <- terra::rast(raster_list2)
 
 # Export tidy year of fire occurrence rasters
-terra::writeRaster(year_rasters, file.path(firehist_folder, "EVER_BICY_1978_2021_year_occurrence.tif"),
+terra::writeRaster(year_rasters, file.path(firehist_folder, "EVER_BICY_1978_2023_year_occurrence.tif"),
                    overwrite = T)
