@@ -278,21 +278,67 @@ tidy_v2_EVER <- tidy_v1_EVER %>%
 
 folder_BICY <- "BICY_FIRE_Perimeter_original"
 
-# Identify relevant BICY file
-( raw_file_BICY <- dir(path = folder_BICY, "*.shp$") ) 
+# Identify relevant BICY files
+( raw_files_BICY <- dir(path = folder_BICY, "*.shp$") ) 
 
-# Read in shapefile
-tidy_v0_BICY <- sf::read_sf(file.path(folder_BICY, raw_file_BICY)) %>%
-  # Transform to WGS84
-  sf::st_transform("EPSG:4326") %>%
-  # Make valid
-  sf::st_make_valid()
+# Create empty list to populate with shapefiles later
+shp_list_BICY <- list()
+
+# For each shapefile...
+for (i in 1:length(raw_files_BICY)){
+  
+  # Grab its name
+  raw_file_name <- raw_files_BICY[i]
+  
+  message(paste0("Reading ", raw_file_name))
+  
+  # Read in shapefile
+  shp <- sf::read_sf(file.path(folder_BICY, raw_files_BICY[i])) %>%
+    # Transform to WGS84
+    sf::st_transform("EPSG:4326") %>%
+    # Make valid
+    sf::st_make_valid()
+  
+  # Add to list
+  shp_list_BICY[[raw_file_name]] <- shp
+}
+
+# For each shapefile...
+for (i in 1:length(shp_list_BICY)){
+  # Grab its name
+  file_name <- names(shp_list_BICY[i])
+  
+  # If the file is "FiresAndBurns_FY78toFY21.shp"...
+  if (file_name == "FiresAndBurns_FY78toFY21.shp"){
+    shp_list_BICY[[file_name]] <- shp_list_BICY[[file_name]] %>%
+      # Create a new column to denote the shapefile where the data came from
+      dplyr::mutate(File_Name = file_name, .before = FIRE_ID) %>%
+      # Move Shape_Leng column
+      dplyr::relocate(Shape_Leng, .after = Shape_Area)
+  }
+  
+  # If the file is not "FiresAndBurns_FY78toFY21.shp"...
+  if (file_name != "FiresAndBurns_FY78toFY21.shp"){
+    shp_list_BICY[[file_name]] <- shp_list_BICY[[file_name]] %>%
+      # Drop Shape_Leng and GlobalID columns
+      dplyr::select(-Shape_Leng, -GlobalID) %>%
+      # Rename the shape columns to match FiresAndBurns_FY78toFY21.shp
+      dplyr::rename(Shape_Area = Shape__Are) %>%
+      dplyr::rename(Shape_Leng = Shape__Len) %>%
+      # Create a new column to denote the shapefile where the data came from
+      dplyr::mutate(File_Name = file_name, .before = FIRE_ID)
+  }
+}
+
+# Unlist the list we generated from above
+tidy_v0_BICY <- shp_list_BICY %>%
+  purrr::list_rbind(x = .)
 
 # Format columns to match Everglades -------------
 
 tidy_v1_BICY <- tidy_v0_BICY %>%
   # Select relevant columns
-  dplyr::select(FIRE_ID, FireNumber, FireName, CalendYear, StartDate, EndDate, FireType) %>%
+  dplyr::select(File_Name, FIRE_ID, FireNumber, FireName, CalendYear, StartDate, EndDate, FireType, geometry) %>%
   # Standardize column names
   dplyr::rename(Fire_ID = FIRE_ID) %>%
   dplyr::rename(Fire_Number = FireNumber) %>%
@@ -309,8 +355,6 @@ tidy_v1_BICY <- tidy_v0_BICY %>%
     # When Fire_Type is "Prescribed", "Burn Area", or "Mechanical", set the value to "RX"
     Fire_Type %in% c("Prescribed", "Burn Area", "Mechanical") ~ "RX"
   )) %>%
-  # Create a new column to denote the shapefile where the data came from
-  dplyr::mutate(File_Name = raw_file_BICY, .before = Fire_ID) %>%
   # Make all columns into character columns
   dplyr::mutate(dplyr::across(.cols = -c(geometry), .fns = as.character))
   
@@ -326,33 +370,39 @@ tidy_v2_BICY <- tidy_v1_BICY %>%
   ), .after = Decld_Date) %>%
   dplyr::mutate(Disc_Date = dplyr::case_when(
     # Fix wrong dates in Disc_Date column
-    Disc_Date == "1981/0208" ~ "1981/02/08",
-    Disc_Date == "198/103/29" ~ "1981/03/29",
-    Disc_Date == "1981/0729" ~ "1981/07/29",
-    Disc_Date == "1982/0109" ~ "1982/01/09",
-    Disc_Date == "0//" ~ NA,
-    Disc_Date == "2003/09/" ~ "2003/09/30",
-    Disc_Date == "2003/07/" ~ "2003/07/31",
-    Disc_Date == "2007/05" ~ "2007/05/31",
-    Disc_Date == "1998/02/29" ~ "1998/03/01",
-    Disc_Date == "2012/0201" ~ "2012/02/01",
-    Disc_Date == "2014/05/xx" ~ "2014/05/31",
-    Disc_Date == "2014/06/xx" ~ "2014/06/30",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "1981/0208" ~ "1981/02/08",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "198/103/29" ~ "1981/03/29",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "1981/0729" ~ "1981/07/29",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "1982/0109" ~ "1982/01/09",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "0//" ~ NA,
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "2003/09/" ~ "2003/09/30",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "2003/07/" ~ "2003/07/31",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "2007/05" ~ "2007/05/31",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "1998/02/29" ~ "1998/03/01",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "2012/0201" ~ "2012/02/01",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "2014/05/xx" ~ "2014/05/31",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Disc_Date == "2014/06/xx" ~ "2014/06/30",
+    File_Name == "BICY_2022_Fires.shp" & Disc_Date == "10/18/2021" ~ "2021/10/18",
     T ~ Disc_Date
   )) %>%
   dplyr::mutate(Decld_Date = dplyr::case_when(
     # Fix wrong dates in Decld_Date column
-    Decld_Date == "7/16/2020" ~ "2020/07/16",
-    Decld_Date == "07/14/2020" ~ "2020/07/14",
-    Decld_Date == "07/16/2020" ~ "2020/07/16",
-    Decld_Date == "1981/03/39" ~ "1981/03/29",
-    Decld_Date == "0//" ~ NA,
-    Decld_Date == "200/02/15" ~ "2000/02/15",
-    Decld_Date == "2006/15/13" ~ "2006/05/13",
-    Decld_Date == "2016/06/xx" ~ "2016/06/30",
-    Decld_Date == "2016/10/xx" ~ "2016/10/31",
-    Decld_Date == "2017/" ~ NA,
-    Decld_Date == "2021/09/31" ~ "2021/10/01",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "7/16/2020" ~ "2020/07/16",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "07/14/2020" ~ "2020/07/14",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "07/16/2020" ~ "2020/07/16",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "1981/03/39" ~ "1981/03/29",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "0//" ~ NA,
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "200/02/15" ~ "2000/02/15",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "2006/15/13" ~ "2006/05/13",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "2016/06/xx" ~ "2016/06/30",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "2016/10/xx" ~ "2016/10/31",
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "2017/" ~ NA,
+    File_Name == "FiresAndBurns_FY78toFY21.shp" & Decld_Date == "2021/09/31" ~ "2021/10/01",
+    File_Name == "BICY_2022_Fires.shp" & Decld_Date == "10/17/2021" ~ "2021/10/17",
+    File_Name == "BICY_2022_Fires.shp" & Decld_Date == "10/21/2021" ~ "2021/10/21",
+    File_Name == "BICY_2022_Fires.shp" & Decld_Date == "12/14/2021" ~ "2021/12/14",
+    File_Name == "BICY_2022_Fires.shp" & Decld_Date == "12/15/2021" ~ "2021/12/15",
+    File_Name == "BICY_2022_Fires.shp" & Decld_Date == "05/13/2022" ~ "2022/05/13",
     T ~ Decld_Date
   )) %>%
   # Convert all dates into proper Date columns
