@@ -4,7 +4,7 @@
 # Script author(s): Angel Chen
 
 # Purpose:
-## This script cleans and combines fire history shapefiles from Everglades National Park (EVER 1948-2021) and Big Cypress National Preserve (BICY 1978-2021)
+## This script cleans and combines fire history shapefiles from Everglades National Park (EVER 1948-2023) and Big Cypress National Preserve (BICY 1978-2023)
 
 ## --------------------------------------------- ##
 #               Housekeeping -----
@@ -24,7 +24,7 @@ librarian::shelf(sf, tidyverse)
 # We make years >= 2011  match this format before applying additional edits to all years
 # Variables Harmonized: File_Name, Fire_ID, Fire_Number, Fire_Name, Year, Disc_Date, Decld_Date, Fire_Type
 
-# Import all EVER shapefiles (1948-2021) -------------
+# Import all EVER shapefiles (1948-2023) -------------
 
 folder_EVER <- "EVER_FIRE PERIMETERS_original"
 
@@ -274,7 +274,7 @@ tidy_v2_EVER <- tidy_v1_EVER %>%
 # Fixing Issues with Big Cypress Fire Data (BICY) ----
 ## ----------------------------------------------- ##
 
-# Import BICY shapefile (1978-2021) -------------
+# Import BICY shapefiles (1978-2023) -------------
 
 folder_BICY <- "BICY_FIRE_Perimeter_original"
 
@@ -416,7 +416,7 @@ tidy_v2_BICY <- tidy_v1_BICY %>%
 # Combining Regions (EVER and BICY) for all Everglades Fires (EVG) 
 ## ------------------------------------------------------------ ##
 
-# Clip EVER fire dataset down to same timeframe as BICY (1978-2021)
+# Clip EVER fire dataset down to same timeframe as BICY (1978-2023)
 tidy_v3_EVER <- tidy_v2_EVER %>%
   dplyr::filter(Year >= 1978)
 
@@ -426,4 +426,4 @@ tidy_v0_EVER_BICY <- tidy_v3_EVER %>%
   dplyr::relocate(Date_Flag, .after = Decld_Date)
 
 # Export harmonized tidy fire perimeters
-sf::st_write(tidy_v0_EVER_BICY, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2021_perim.shp"))
+sf::st_write(tidy_v0_EVER_BICY, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2023_perim.shp"))
