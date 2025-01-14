@@ -27,7 +27,7 @@
 # Load necessary libraries
 # If you don't have the "librarian" package, uncomment the next line and run it to install the package
 # install.packages("librarian")
-librarian::shelf(terra, tidyterra, tidyverse)
+librarian::shelf(terra, tidyterra, sf, tidyverse)
 
 # Point to FireHistory folder on Malone Lab server
 firehist_folder <- file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory") 
@@ -99,4 +99,27 @@ terra::plot(time_since, ext = c(460000, 540000, 2815000, 2900000),
 # Export tidy time since raster
 terra::writeRaster(time_since, file.path(firehist_folder, "EVER_BICY_1978_2023_time_since.tif"),
                    overwrite = T)
+
+## ----------------------------------------------- ##
+#     Fire Perimeter Shapefile Calculations -----
+## ----------------------------------------------- ##
+
+# Calculating area and perimeter length -------------------------------------------
+
+# Turn off spherical geometry (s2) to avoid st_area() and st_perimeter() erroring out
+# Spherical geometry stops some sf functions from working on overlapping geometries
+# See https://github.com/r-spatial/sf/issues/1762
+sf::sf_use_s2(FALSE)
+
+perim_shape_v2 <- perim_shape %>%
+  # Make the geometries valid 
+  sf::st_make_valid() %>%
+  # Calculate area and perimeter length
+  dplyr::mutate(area_m2 = sf::st_area(geometry),
+                perim_m = sf::st_perimeter(geometry))
+
+# Turn spherical geometry back on
+sf::sf_use_s2(TRUE)
+
+# Calculating annual total area burned, total Rx area burned, total WF area burned -----
 
