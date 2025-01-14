@@ -81,3 +81,22 @@ terra::writeRaster(total_fires_1978_2023, file.path(firehist_folder, "EVER_BICY_
                    overwrite = T)
 
 # Calculating time since last fire ------------------------------------------------
+
+# TEMPORARY FIX FOR REORDERING RASTER LAYERS
+# I'll make sure to export the rasters in the correct chronological order next time
+year_rasters_reordered <- c(year_rasters[[1:44]], year_rasters[[46]], year_rasters[[45]])
+# Check that it's correct
+names(year_rasters_reordered)
+
+# Get current year
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+# Find the time since last fire
+time_since <- current_year - max(year_rasters_reordered, na.rm = TRUE)
+# Check plot
+terra::plot(time_since, ext = c(460000, 540000, 2815000, 2900000),
+            main = "Time since last fire: how many years since an area got burned")
+
+# Export tidy time since raster
+terra::writeRaster(time_since, file.path(firehist_folder, "EVER_BICY_1978_2023_time_since.tif"),
+                   overwrite = T)
+
