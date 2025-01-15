@@ -58,20 +58,20 @@ names(burned_rasters_reordered)
 # Calculating total fires (1978-2023) ------------------------------------------------
 
 # Testing
-# x <- total_fires(raster_stack = burned_rasters_reordered, start_year = 2010, num_years = 1)
+# x <- total_fires(raster_stack = burned_rasters_reordered, start_year = 2010, end_year = 2011)
 # terra::plot(x)
 # 
-# y <- total_fires(raster_stack = burned_rasters_reordered, start_year = 2014, num_years = 3)
+# y <- total_fires(raster_stack = burned_rasters_reordered, start_year = 2014, end_year = 2017)
 # terra::plot(y, ext = c(400000, 600000, 2770000, 2940000))
 # terra::plot(y, ext = c(485000, 500000, 2870000, 2885000),
 #             main = "Total fires: how many times an area got burned from 2014 to 2017")
 # 
-# z <- total_fires(raster_stack = burned_rasters_reordered, start_year = 2012, num_years = 10)
+# z <- total_fires(raster_stack = burned_rasters_reordered, start_year = 2012, end_year = 2022)
 # terra::plot(z, ext = c(485000, 520000, 2855000, 2885000),
 #             main = "Total fires: how many times an area got burned from 2012 to 2022")
 
 # Find the total fires from 1978 to 2023
-total_fires_1978_2023 <- total_fires(raster_stack = burned_rasters_reordered, start_year = 1978, num_years = 45)
+total_fires_1978_2023 <- total_fires(raster_stack = burned_rasters_reordered, start_year = 1978, end_year = 2023)
 # Check plot
 terra::plot(total_fires_1978_2023, ext = c(460000, 540000, 2815000, 2900000),
             main = "Total fires: how many times an area got burned from 1978 to 2023")
