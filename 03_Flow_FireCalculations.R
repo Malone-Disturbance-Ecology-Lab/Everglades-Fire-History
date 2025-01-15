@@ -50,7 +50,7 @@ source("R/my_functions.R")
 
 # TEMPORARY FIX FOR REORDERING RASTER LAYERS
 # I'll make sure to export the rasters in the correct chronological order next time
-burned_rasters_reordered <- c(burned_rasters[[1:44]], burned_rasters[[46]], burned_rasters[[45]])
+burned_rasters_reordered <- terra::subset(burned_rasters, order(names(burned_rasters)))
 # Check that it's correct
 names(burned_rasters_reordered)
 
@@ -84,7 +84,7 @@ terra::writeRaster(total_fires_1978_2023, file.path(firehist_folder, "EVER_BICY_
 
 # TEMPORARY FIX FOR REORDERING RASTER LAYERS
 # I'll make sure to export the rasters in the correct chronological order next time
-year_rasters_reordered <- c(year_rasters[[1:44]], year_rasters[[46]], year_rasters[[45]])
+year_rasters_reordered <- terra::subset(year_rasters, order(names(year_rasters)))
 # Check that it's correct
 names(year_rasters_reordered)
 
