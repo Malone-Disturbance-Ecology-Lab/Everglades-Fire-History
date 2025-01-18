@@ -48,13 +48,13 @@ source("R/my_functions.R")
 #         Fire Raster Calculations -----
 ## ----------------------------------------------- ##
 
+# Calculating total fires (1978-2023) ------------------------------------------------
+
 # TEMPORARY FIX FOR REORDERING RASTER LAYERS
 # I'll make sure to export the rasters in the correct chronological order next time
 burned_rasters_reordered <- terra::subset(burned_rasters, order(names(burned_rasters)))
 # Check that it's correct
 names(burned_rasters_reordered)
-
-# Calculating total fires (1978-2023) ------------------------------------------------
 
 # Find the total fires from 1978 to 2023
 total_fires_1978_2023 <- total_fires(raster_stack = burned_rasters_reordered, start_year = 1978, end_year = 2023)
