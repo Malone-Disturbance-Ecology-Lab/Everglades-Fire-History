@@ -104,22 +104,9 @@ terra::writeRaster(time_since, file.path(firehist_folder, "EVER_BICY_1978_2023_t
 #     Fire Perimeter Shapefile Calculations -----
 ## ----------------------------------------------- ##
 
-# Calculating area and perimeter length -------------------------------------------
+# Calculate annual total area burned, total WF area burned, total RX area burned, 
+# mean fire size, and mean area/perimeter
+summary_calculations <- fire_summary(fire_shapefile = perim_shape)
 
-# Turn off spherical geometry (s2) to avoid st_area() and st_perimeter() erroring out
-# Spherical geometry stops some sf functions from working on overlapping geometries
-# See https://github.com/r-spatial/sf/issues/1762
-sf::sf_use_s2(FALSE)
-
-perim_shape_v2 <- perim_shape %>%
-  # Make the geometries valid 
-  sf::st_make_valid() %>%
-  # Calculate area and perimeter length
-  dplyr::mutate(area_m2 = sf::st_area(geometry),
-                perim_m = sf::st_perimeter(geometry))
-
-# Turn spherical geometry back on
-sf::sf_use_s2(TRUE)
-
-# Calculating annual total area burned, total Rx area burned, total WF area burned -----
-
+# Check
+dplyr::glimpse(summary_calculations)
