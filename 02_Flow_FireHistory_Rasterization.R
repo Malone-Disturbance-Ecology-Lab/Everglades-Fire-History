@@ -13,7 +13,7 @@
 # Load necessary libraries
 # If you don't have the "librarian" package, uncomment the next line and run it to install the package
 # install.packages("librarian")
-librarian::shelf(tidyterra, tidyverse)
+librarian::shelf(terra, tidyterra, tidyverse)
 
 ## ----------------------------------------------- ##
 #       Creating Yearly Fire Rasters -----
@@ -43,7 +43,7 @@ burned_EVER_BICY_1978_2023_perim <- EVER_BICY_1978_2023_perim %>%
 raster_list <- list()
 
 # Create a loop to make annual burned/unburned rasters
-for (a_year in unique(burned_EVER_BICY_1978_2023_perim$Year)){
+for (a_year in sort(unique(burned_EVER_BICY_1978_2023_perim$Year))){
   
   message(paste0("Rasterizing for year ", a_year))
   
@@ -72,7 +72,7 @@ terra::writeRaster(burned_rasters, file.path(firehist_folder, "EVER_BICY_1978_20
 raster_list2 <- list()
 
 # Create a loop to make annual rasters for year of fire
-for (a_year in unique(EVER_BICY_1978_2023_perim$Year)){
+for (a_year in sort(unique(EVER_BICY_1978_2023_perim$Year))){
   
   message(paste0("Rasterizing for year ", a_year))
   
