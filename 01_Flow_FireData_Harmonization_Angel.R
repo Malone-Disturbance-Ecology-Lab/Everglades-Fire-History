@@ -32,7 +32,7 @@ folder_EVER <- "EVER_FIRE PERIMETERS_original"
 ( raw_files_EVER <- dir(path = folder_EVER, "*.shp$") ) 
 
 # Specify the files we don't want
-not_wanted_EVER <- c("EVER_FIRES_2022.shp")
+not_wanted_EVER <- c("")
 
 # Remove the unwanted files from our vector
 raw_files_EVER <- raw_files_EVER[! raw_files_EVER %in% not_wanted_EVER]
@@ -48,8 +48,8 @@ for (i in 1:length(raw_files_EVER)){
   
   message(paste0("Reading ", raw_file_name))
   
-  # If the file name is "EVER_FIRES_2020.shp", "EVER_Fires_2021.shp", or "EVER_FIRES_2023.shp"...
-  if (raw_file_name %in% c("EVER_FIRES_2020.shp", "EVER_Fires_2021.shp", "EVER_FIRES_2023.shp")){
+  # If the file name is "EVER_FIRES_2020.shp", "EVER_Fires_2021.shp", "EVER_FIRES_2022_exp012025.shp", or "EVER_FIRES_2023.shp"...
+  if (raw_file_name %in% c("EVER_FIRES_2020.shp", "EVER_Fires_2021.shp", "EVER_FIRES_2022_exp012025.shp", "EVER_FIRES_2023.shp")){
     # Read in shapefile
     shp <- sf::read_sf(file.path(folder_EVER, raw_files_EVER[i])) %>% 
       # Drop Z dimension
@@ -74,7 +74,7 @@ for (i in 1:length(raw_files_EVER)){
 
 # Combining all EVER shapefiles ----------------------
 
-years_2018_2023 <- c("EVER_FIRES_2018.shp", "EVER_FIRES_2019.shp", "EVER_FIRES_2020.shp", "EVER_Fires_2021.shp", "EVER_FIRES_2023.shp")
+years_2018_2023 <- c("EVER_FIRES_2018.shp", "EVER_FIRES_2019.shp", "EVER_FIRES_2020.shp", "EVER_Fires_2021.shp", "EVER_FIRES_2022_exp012025.shp", "EVER_FIRES_2023.shp")
 
 years_1948_2017 <- setdiff(raw_files_EVER, years_2018_2023)
 
@@ -121,8 +121,8 @@ for (i in 1:length(shp_list_EVER)){
       dplyr::mutate(dplyr::across(.cols = -c(geometry), .fns = as.character))
   }
   
-  # If the file is from 2020, 2021, or 2023...
-  if (file_name %in% c("EVER_FIRES_2020.shp", "EVER_Fires_2021.shp", "EVER_FIRES_2023.shp")) {
+  # If the file is from 2020, 2021, 2022, or 2023...
+  if (file_name %in% c("EVER_FIRES_2020.shp", "EVER_Fires_2021.shp", "EVER_FIRES_2022_exp012025.shp", "EVER_FIRES_2023.shp")) {
     shp_list_EVER[[file_name]] <- shp_list_EVER[[file_name]] %>%
       # Select relevant columns
       dplyr::select(FIRE_ID, FIRE_NUM, FIRE_NAME, CY_YEAR, DISC_DATE, DECLD_DATE, Incident_t, fire_cause) %>%
@@ -137,6 +137,8 @@ for (i in 1:length(shp_list_EVER)){
       dplyr::mutate(Fire_Type = dplyr::case_when(
         # When Incident_t is "WF" or "FU", set the value to "11"
         Incident_t == "WF" | Incident_t == "FU" ~ "11",
+        # When Incident_t is "WF - State", set the value to "11",
+        Incident_t == "WF - State" ~ "11",
         # When Incident_t is "RX" and fire_cause is "Management", set the value to "48"
         Incident_t == "RX" & fire_cause == "Management" ~ "48",
         # When Incident_t is "RX" and fire_cause is not "Management", set the value to "11"
@@ -426,4 +428,5 @@ tidy_v0_EVER_BICY <- tidy_v3_EVER %>%
   dplyr::relocate(Date_Flag, .after = Decld_Date)
 
 # Export harmonized tidy fire perimeters
-sf::st_write(tidy_v0_EVER_BICY, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2023_perim.shp"))
+sf::st_write(tidy_v0_EVER_BICY, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2023_perim.shp"),
+             append = FALSE)
