@@ -430,3 +430,4 @@ tidy_v0_EVER_BICY <- tidy_v3_EVER %>%
 # Export harmonized tidy fire perimeters
 sf::st_write(tidy_v0_EVER_BICY, file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory", "EVER_BICY_1978_2023_perim.shp"),
              append = FALSE)
+
