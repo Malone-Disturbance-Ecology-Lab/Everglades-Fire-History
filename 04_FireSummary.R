@@ -205,14 +205,14 @@ p.totalFires <- EVG.L1.df %>% ggplot() +
 p.tsf <-EVG.L1.df %>% ggplot() + 
   geom_col( aes( x =  L1.new ,y = time_since) ) + 
   coord_polar() + xlab('') + ylim( 0, 8) + 
-  ylab('Time Since Fire') + 
+  ylab('Time Since Fire (Years)') + 
   theme(axis.text.x = element_text(angle = 45, vjust = 0, hjust=0)) + 
   theme_minimal() + coord_radial(inner.radius = 0, 
                             r_axis_inside = TRUE,
                             rotate_angle = TRUE, expand = FALSE,
                             start = 0.25 * pi, end = 1.6 * pi) +
   guides(theta = guide_axis_theta(angle = 0),
-         r     = guide_axis(angle = 0))
+         r     = guide_axis(angle = 0))+ theme(text = element_text(size = 18))
 
 # L2 Summary:
  
@@ -257,26 +257,26 @@ for ( i in 1:length(total.fires.summary$value )){
 p.totalFires <- EVG.L1.df %>% ggplot() + 
   geom_col( aes( x =  L1.new, y = total_fires_1978_2023) ) + 
   coord_polar() + xlab('') + ylim( 0, 8) + 
-  ylab('Number of Fires (1978 - 2023)') + 
+  ylab('Number of Fires (1978–2023)') + 
   theme(axis.text.x = element_text(angle = 45, vjust = 0, hjust=0)) + 
   theme_minimal() + coord_radial(inner.radius = 0, 
                                  r_axis_inside = TRUE,
                                  rotate_angle = TRUE, expand = FALSE,
                                  start = 0.25 * pi, end = 1.6 * pi) +
   guides(theta = guide_axis_theta(angle = 0),
-         r     = guide_axis(angle = 0))+ theme(text = element_text(size = 20))
+         r     = guide_axis(angle = 0))+ theme(text = element_text(size = 18))
 
 p.tf.L2 <- total.fires.summary %>% ggplot() + 
                        geom_col( aes(x=value, y= frac )) +
-  ylab( 'Landscape Coverage (%)')  + xlab( 'Number of Fires') +
-  theme_minimal() + theme(text = element_text(size = 20))
+  ylab( 'Landscape Coverage (%)')  + xlab( 'Number of Fires (1978–2023)') +
+  theme_minimal() + theme(text = element_text(size = 18))
 
 p.totalFires.l2 <- EVG.L2.df %>% ggplot() + 
   geom_col( aes( x = fct_reorder( L2.new, total_fires_1978_2023), 
-                 y = total_fires_1978_2023)) + 
-  theme(text = element_text(size = 20), 
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  ylab( "") + xlab("") +
+                 y = total_fires_1978_2023)) + theme_bw() +
+  theme(text = element_text(size = 18), 
+        axis.text.x = element_text(angle = 45, hjust=1)) +
+  ylab( "Number of Fires\n(1978–2023)") + xlab("") +
   geom_errorbar(data= EVG.L2.df, 
                 aes( x = fct_reorder( L2.new, total_fires_1978_2023),
                      ymin = lower.tf.adj, ymax = upper.tf))  
@@ -284,14 +284,16 @@ p.totalFires.l2 <- EVG.L2.df %>% ggplot() +
 map.total.fires <- ggarrange(ggplot( ) + 
   geom_spatraster(data =total_fires_1978_2023.cm ) + 
   paletteer::scale_fill_paletteer_c("ggthemes::Sunset-Sunrise Diverging",na.value = "transparent") + theme_minimal()+
-  geom_sf(data = aoi,  fill = NA, linewidth = 1.25) + 
+  geom_sf(data = aoi,  fill = NA, linewidth = 1.25, color = "black") + 
+    labs(fill = "Fires") +
     theme(text = element_text(size = 20), 
-          legend.title = element_blank(),
+          legend.title =  element_text(size = 15),
+          legend.text =  element_text(size = 13),
           axis.text.x = element_text(angle = 45))) 
 
 
 
-png("FIGURES/Total_Fires_MapsL2.png", width = 3000, height=3000, res=300)
+png("FIGURES/Total_Fires_MapsL2.png", width = 3000, height=3300, res=300)
 ggarrange(map.total.fires, p.tf.L2 , p.totalFires, p.totalFires.l2,
           ncol=2, nrow=2, labels=c("a.", "b.", "c.", "d."),
           font.label=list(color="black",size=20))
@@ -301,26 +303,29 @@ dev.off()
 p.TSF.l2 <-EVG.L2.df %>% ggplot() + 
   geom_col( aes( x = fct_reorder( L2.new, time_since), y =time_since )) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
-  xlab("")  +  ylab("") +
+  xlab("")  +  ylab("Time Since Fire (Years)") +
   geom_errorbar(data= EVG.L2.df, 
                 aes( x = fct_reorder( L2.new, time_since),
                      ymin = lower.tsf.adj, ymax = upper.tsf)) + theme_bw() + 
-  theme(text = element_text(size = 20),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+  theme(text = element_text(size = 18),
+        axis.text.x = element_text(angle = 45, hjust=1)) 
 
 
 map.time_since <- ggarrange(ggplot( ) + 
                                geom_spatraster(data = time_since.cm ) + 
-                               paletteer::  scale_fill_paletteer_c("grDevices::Purple-Yellow", na.value='transparent') + theme_minimal() +
-                               geom_sf(data = aoi,  fill = NA, linewidth = 1.25) + theme(legend.title = element_blank())  , 
-                            labels="a.")
+                               paletteer::  scale_fill_paletteer_c("grDevices::Purple-Yellow", na.value='transparent') +
+                               theme_minimal() +
+                               geom_sf(data = aoi,  fill = NA, linewidth = 1.25, color = "black") + 
+                               labs(fill = "Years") +
+                               theme(text = element_text(size = 20), axis.text.x = element_text(angle = 45),
+                                     legend.title =  element_text(size = 18)), labels="a.")
 
 
 
 plots <- ggarrange( p.tsf,p.TSF.l2,
                    ncol=2, nrow=1, labels=c("b.", "c."))
 
-png("FIGURES/TSF_Maps.png", width = 2200, height=2500, res=300)
+png("FIGURES/TSF_Maps.png", width = 3000, height=3300, res=300)
 ggarrange(map.time_since,plots, ncol=1, nrow=2)
 
 dev.off()
