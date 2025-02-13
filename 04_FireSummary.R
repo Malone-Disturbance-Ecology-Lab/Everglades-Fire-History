@@ -154,9 +154,12 @@ map.l1 <- ggplot() + geom_sf( data = EVG.L1,
 map.l2 <- ggplot() + geom_sf( data = EVG.L2, 
                     aes( fill=L2.new) , col=NA ) + 
   paletteer::scale_fill_paletteer_d("ggthemes::Tableau_20")+ 
-  geom_sf(data = enp,  fill = NA, linewidth = 1.25) +
-  geom_sf(data = bnp, fill = NA , linewidth = 1.25) +
-  guides(fill=guide_legend(title=""))+theme_bw()
+  geom_sf(data = enp,  fill = NA, linewidth = 1.25, aes(color = Name)) +
+  geom_sf(data = bnp, fill = NA , linewidth = 1.25, aes(color = Name)) +
+  scale_color_manual(values = c("firebrick", "purple4")) +
+  guides(fill = guide_legend(title = "Ecosystem"),
+         color = guide_legend(title = "Area")) +
+  theme_bw()
 
 setwd(directory)
 
