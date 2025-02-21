@@ -10,7 +10,8 @@ library(sf)
 library(tidyterra)
 library(ggpubr)
 library(paletteer)
-library( forcats)
+library(forcats)
+library(ggspatial)
 
 directory <- file.path("/", 'Users', 'sm3466', "YSE Dropbox", "Sparkle Malone", "Research", "Everglades-Fire-History")
 setwd(directory)
@@ -151,20 +152,78 @@ map.l1 <- ggplot() + geom_sf( data = EVG.L1,
   geom_sf(data = bnp, fill = NA , linewidth = 1.25) +
   guides(fill=guide_legend(title="")) + theme_bw()
 
-map.l2 <- ggplot() + geom_sf( data = EVG.L2, 
-                    aes( fill=L2.new) , col=NA ) + 
+map.l2 <- ggplot() + 
+  geom_sf( data = EVG.L2, 
+           aes( fill=L2.new) , col=NA) + 
   paletteer::scale_fill_paletteer_d("ggthemes::Tableau_20")+ 
-  geom_sf(data = enp,  fill = NA, linewidth = 1.25, aes(color = Name)) +
-  geom_sf(data = bnp, fill = NA , linewidth = 1.25, aes(color = Name)) +
-  scale_color_manual(values = c("firebrick", "purple4")) +
-  guides(fill = guide_legend(title = "Ecosystem"),
-         color = guide_legend(title = "Area")) +
+  geom_sf(data = enp,  fill = NA, linewidth = 1.25, color = "black") +
+  geom_sf(data = bnp, fill = NA , linewidth = 1.25, color = "black") +
+  guides(fill = guide_legend(title = "Ecosystem")) +
   theme_bw()
+
+# load data for the Florida inlay plot
+load(file.path(firehist_folder, "FL_inlay.RData"))
+
+# create the Florida inlay plot
+inlay_plot <- ggplot() +
+  geom_sf(data = FL_bound, fill = "lightgrey", color = "#3B3A3F") +
+  geom_sf(data = EVG_bound, color = "#3B3A3F", fill = "#3B3A3F", size = 1.5) +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
+map.l2_ver2 <- map.l2 +
+  # park labels
+  annotate(
+    "text",
+    x = 454000,
+    y = 2882900,
+    label = "Big\nCypress\nNational\nPreserve",
+    size = 3.5,
+    color = 'black',
+    fontface = "plain"
+  ) +
+  annotate(
+    "text",
+    x = 460000,
+    y = 2812900,
+    label = "Everglades\nNational\nPark",
+    size = 3.5,
+    color = "black",
+    fontface = "plain"
+  ) +
+  # FL inlay
+  annotation_custom(
+    grob = ggplotGrob(inlay_plot),
+    xmin = 525731,
+    xmax = 569000,
+    ymin = 2843900,
+    ymax = 2942900
+  ) +
+  # north arrow
+  annotation_north_arrow(
+    location = "bl",
+    width = unit(1, "cm"),
+    height = unit(1.5, "cm"),
+    pad_y = unit(1, "cm"),
+    style = north_arrow_orienteering()
+  ) +
+  # scale bar
+  annotation_scale(
+    location = "bl",
+    width_hint = 0.2,
+    height = unit(0.4, "cm"),
+    style = "ticks",
+    bar_cols = c("black", "white"),
+    text_cex = 2
+  )
 
 setwd(directory)
 
-png("FIGURES/Vegetation MapsL2.png", width = 2000, height=2000, res=300)
-ggarrange( map.l2, labels="a.")
+png("FIGURES/Vegetation MapsL2.png", width = 2200, height=2000, res=300)
+ggarrange( map.l2_ver2, labels="a.")
 dev.off()
 
 png("FIGURES/Vegetation MapsL1.png", width = 2000, height=2000, res=300)
