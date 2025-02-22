@@ -377,14 +377,16 @@ map.time_since <- ggarrange(ggplot( ) +
                                geom_sf(data = aoi,  fill = NA, linewidth = 1.25, color = "black") + 
                                labs(fill = "Years") +
                                theme(text = element_text(size = 20), axis.text.x = element_text(angle = 45),
-                                     legend.title =  element_text(size = 18)), labels="a.")
+                                     legend.title =  element_text(size = 18)), labels="a.",
+                            font.label=list(size=20))
 
 
 
 plots <- ggarrange( p.tsf,p.TSF.l2,
-                   ncol=2, nrow=1, labels=c("b.", "c."))
+                   ncol=2, nrow=1, labels=c("b.", "c."),
+                   font.label=list(size=20))
 
-png("FIGURES/TSF_Maps.png", width = 3000, height=3300, res=300)
+png("FIGURES/TSF_Maps.png", width = 3000, height=3400, res=300)
 ggarrange(map.time_since,plots, ncol=1, nrow=2)
 
 dev.off()
