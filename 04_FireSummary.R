@@ -100,7 +100,7 @@ png("FIGURES/Total_Area_Timeseries.png", width = 2000, height=1500, res=300)
 ggarrange(p.1, p.2, ncol=1, nrow=2)
 dev.off()
 
-png("FIGURES/FireSize_Timeseries.png", width = 2000, height=1200, res=300)
+png("FIGURES/FireSize_Timeseries.png", width = 2000, height=1400, res=300)
 ggarrange( p.mean_fire_size,
 p.mean_area_over_perim, ncol=1, nrow=2,labels=c("a.", "b."))
 dev.off()
