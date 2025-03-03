@@ -413,6 +413,35 @@ tidy_v2_BICY <- tidy_v1_BICY %>%
   # Convert Year to a numeric column
   dplyr::mutate(Year = as.numeric(Year))
 
+# Cropping out the 1 small polygon in Canada -------------
+
+# For every row in the harmonized perimeters...  
+for (i in 1:nrow(tidy_v2_BICY)){
+  # Grab the bounding box coordinates
+  bounds <- sf::st_bbox(tidy_v2_BICY$geometry[i])
+  # If the max Y coordinate exists and is over 27,
+  if (!is.na(bounds$ymax) & bounds$ymax > 27){
+    # Save the index of the row
+    poly_index <- i
+    # Save the original min X, max X, min Y bounds
+    x_min <- as.numeric(bounds$xmin)
+    x_max <- as.numeric(bounds$xmax)
+    y_min <- as.numeric(bounds$ymin)
+  }
+}
+
+# Check to see a polygon in Canada
+plot(tidy_v2_BICY$geometry[poly_index])
+
+# Crop out that one specific polygon (tiny polygon at the very top center)
+cropped_out <- tidy_v2_BICY$geometry[poly_index] %>%
+  sf::st_crop(xmin = x_min, ymin = y_min, xmax = x_max, ymax = 26.26927)
+
+# Check it's cropped out
+plot(cropped_out)
+
+# Put the cropped version back into the harmonized perimeters
+tidy_v2_BICY$geometry[poly_index] <- cropped_out
 
 ## ------------------------------------------------------------ ##
 # Combining Regions (EVER and BICY) for all Everglades Fires (EVG) 
