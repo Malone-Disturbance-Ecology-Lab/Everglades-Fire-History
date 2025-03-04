@@ -1,6 +1,19 @@
+## --------------------------------------------- ##
+#                  Fire Summary
+## --------------------------------------------- ##
+# Script author(s): Sparkle Malone
+
+# Purpose:
+## This script calculates summary statistics and 
+## exports visualizations for the Scientific Data paper
+
+## --------------------------------------------- ##
+#               Housekeeping -----
+## --------------------------------------------- ##
 
 rm(list=ls())
 
+# Load necessary libraries
 library(units)
 library(ggplot2)
 library(dplyr)
@@ -15,6 +28,10 @@ library(ggspatial)
 
 directory <- file.path("/", 'Users', 'sm3466', "YSE Dropbox", "Sparkle Malone", "Research", "Everglades-Fire-History")
 setwd(directory)
+
+## --------------------------------------------- ##
+#           Summary Calculations -----
+## --------------------------------------------- ##
 
 # Summary Time Series:  ####
 firehist_folder <- file.path("/", "Volumes", "malonelab", "Research", "ENP", "ENP Fire", "FireHistory") 
@@ -63,6 +80,10 @@ total_fires_1978_2023.cm
 # Summary of temporal change:
 summary_calculations.ma %>% names
 
+## --------------------------------------------- ##
+#     Total Area and Fire Size Time Series 
+#                Fig 2, Fig 3 -----
+## --------------------------------------------- ##
 
 p.total.area <- summary_calculations.ma %>%  ggplot( aes(x= Year, y = total_area_burned/1000000)) + 
   geom_col( ) + theme_bw( ) + 
@@ -105,6 +126,10 @@ ggarrange( p.mean_fire_size,
 p.mean_area_over_perim, ncol=1, nrow=2,labels=c("a.", "b."))
 dev.off()
 
+## --------------------------------------------- ##
+#          Vegetation Layer Summary -----
+## --------------------------------------------- ##
+
 # Summary by Import Vegetation Layer ####
 
 load( '//Volumes/malonelab/Research/ENP/EVERGLADES_VEGETATION_L1_L2.RDATA') 
@@ -141,6 +166,10 @@ EVG.L1 <- zonal(x = total_fires_1978_2023, z= vect(EVG.L1) ,
   zonal(x = time_since,
                 fun = "median", as.polygons=T,  na.rm=TRUE)
 
+## --------------------------------------------- ##
+#                Vegetation Maps
+#                  Fig 1 -----
+## --------------------------------------------- ##
 
 # Figures: 
 # Vegetation Layers:
@@ -230,6 +259,10 @@ png("FIGURES/Vegetation MapsL1.png", width = 2000, height=2000, res=300)
 ggarrange( map.l1, labels="a.")
 dev.off()
 
+## --------------------------------------------- ##
+#             Fire History Summary -----
+## --------------------------------------------- ##
+
 # Fire History Layers:
 
 EVG.L1.df <- EVG.L1 %>% as.data.frame() %>% mutate( area = as.numeric(area))
@@ -313,6 +346,11 @@ for ( i in 1:length(total.fires.summary$value )){
   print(total.fires.summary$frac[i])
 }
 
+## --------------------------------------------- ##
+#                Total Fires Map 
+#                    Fig 4 -----
+## --------------------------------------------- ##
+
 p.totalFires <- EVG.L1.df %>% ggplot() + 
   geom_col( aes( x =  L1.new, y = total_fires_1978_2023) ) + 
   coord_polar() + xlab('') + ylim( 0, 8) + 
@@ -358,6 +396,11 @@ ggarrange(map.total.fires, p.tf.L2 , p.totalFires, p.totalFires.l2,
           font.label=list(color="black",size=20))
 
 dev.off()
+
+## --------------------------------------------- ##
+#              Time Since Fire Map
+#                    Fig 5 -----
+## --------------------------------------------- ##
 
 p.TSF.l2 <-EVG.L2.df %>% ggplot() + 
   geom_col( aes( x = fct_reorder( L2.new, time_since), y =time_since )) + 
