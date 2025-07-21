@@ -96,5 +96,3 @@ summary_calculations <- fire_summary(fire_shapefile = perim_shape)
 
 # Check
 dplyr::glimpse(summary_calculations)
-
-write.csv(summary_calculations,  file.path(firehist_folder, "summary_calculations.csv"))

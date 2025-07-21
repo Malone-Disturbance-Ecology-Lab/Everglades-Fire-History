@@ -9,8 +9,6 @@ Uses fire perimeters to measure fire history patterns in the Everglades
 
 - **03_Flow_FireCalculations.R**: This script calculates fire history statistics for the files created from step 1 and 2: `EVER_BICY_1978_2023_perim.shp`, `EVER_BICY_1978_2023_burned.tif`, and `EVER_BICY_1978_2023_year_occurrence.tif`.
 
-- **04_FireSummary.R**: This script summarizes results and makes figures for the Scientific Data manuscript.
-
 ### Deprecated Scripts
 
 The `deprecated` folder hosts scripts that are no longer needed.
