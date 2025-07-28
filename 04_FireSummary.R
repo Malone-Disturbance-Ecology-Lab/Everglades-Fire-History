@@ -20,9 +20,6 @@ summary_calculations.ma <- summary_calculations %>% mutate( ma.total_area_burned
                                                             ma.mean_area_over_perim = zoo::rollmean( mean_area_over_perim, 5,fill=NA) ) 
 
 # Evaluation of total area burned:
-library(tseries)
-library(trend)
-
 #Evaluation of trends: ##
 
 Trends <- function( data, var1, var2){
@@ -94,6 +91,7 @@ total_fires_1978_2023.cm
 # Summary of temporal change:
 summary_calculations.ma %>% names
 
+summary_calculations %>%  ggplot( aes(x= Year, y = total_area_burned))
 
 p.total.area <- summary_calculations.ma %>%  ggplot( aes(x= Year, y = total_area_burned/1000000)) + 
   geom_col( ) + theme_bw( ) + 
