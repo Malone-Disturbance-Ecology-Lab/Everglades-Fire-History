@@ -15,22 +15,7 @@
 
 rm(list=ls())
 
-<<<<<<< HEAD
-# Load necessary libraries
-library(units)
-library(ggplot2)
-library(dplyr)
-library(zoo)
-library(terra)
-library(sf)
-library(tidyterra)
-library(ggpubr)
-library(paletteer)
-library(forcats)
-library(ggspatial)
-=======
 librarian::shelf(terra, tidyterra, tidyverse, sf, ggpubr, units, ggplot2, zoo, paletteer, forcats)
->>>>>>> a8b29a64efc02994cc028aa44ce23871c9661d52
 
 directory <- file.path("/", 'Users', 'sm3466', "YSE Dropbox", "Sparkle Malone", "Research", "Everglades-Fire-History")
 setwd(directory)
@@ -226,14 +211,9 @@ map.l1 <- ggplot() + geom_sf( data = EVG.L1,
   geom_sf(data = bnp, fill = NA , linewidth = 1.25) +
   guides(fill=guide_legend(title="")) + theme_bw()
 
-<<<<<<< HEAD
 map.l2 <- ggplot() + 
   geom_sf( data = EVG.L2, 
            aes( fill=L2.new) , col=NA) + 
-=======
-map.l2 <- ggplot() + geom_sf( data = EVG.L2, 
-                              aes( fill=L2.new) , col=NA ) + 
->>>>>>> a8b29a64efc02994cc028aa44ce23871c9661d52
   paletteer::scale_fill_paletteer_d("ggthemes::Tableau_20")+ 
   geom_sf(data = enp,  fill = NA, linewidth = 1.25, color = "black") +
   geom_sf(data = bnp, fill = NA , linewidth = 1.25, color = "black") +
@@ -414,15 +394,9 @@ p.totalFires <- EVG.L1.df %>% ggplot() +
          r     = guide_axis(angle = 0))+ theme(text = element_text(size = 18))
 
 p.tf.L2 <- total.fires.summary %>% ggplot() + 
-<<<<<<< HEAD
                        geom_col( aes(x=value, y= frac )) +
   ylab( 'Landscape Coverage (%)')  + xlab( 'Number of Fires (1978–2023)') +
   theme_minimal() + theme(text = element_text(size = 18))
-=======
-  geom_col( aes(x=value, y= frac )) +
-  ylab( 'Landscape Coverage (%)')  + xlab( 'Number of Fires') +
-  theme_minimal() + theme(text = element_text(size = 20))
->>>>>>> a8b29a64efc02994cc028aa44ce23871c9661d52
 
 p.totalFires.l2 <- EVG.L2.df %>% ggplot() + 
   geom_col( aes( x = fct_reorder( L2.new, total_fires_1978_2023), 
@@ -435,7 +409,6 @@ p.totalFires.l2 <- EVG.L2.df %>% ggplot() +
                      ymin = lower.tf.adj, ymax = upper.tf))  
 
 map.total.fires <- ggarrange(ggplot( ) + 
-<<<<<<< HEAD
   geom_spatraster(data =total_fires_1978_2023.cm ) + 
   paletteer::scale_fill_paletteer_c("ggthemes::Sunset-Sunrise Diverging",na.value = "transparent") + theme_minimal()+
   geom_sf(data = aoi,  fill = NA, linewidth = 1.25, color = "black") + 
@@ -444,14 +417,6 @@ map.total.fires <- ggarrange(ggplot( ) +
           legend.title =  element_text(size = 15),
           legend.text =  element_text(size = 13),
           axis.text.x = element_text(angle = 45))) 
-=======
-                               geom_spatraster(data =total_fires_1978_2023.cm ) + 
-                               paletteer::scale_fill_paletteer_c("ggthemes::Sunset-Sunrise Diverging",na.value = "transparent") + theme_minimal()+
-                               geom_sf(data = aoi,  fill = NA, linewidth = 1.25) + 
-                               theme(text = element_text(size = 20), 
-                                     legend.title = element_blank(),
-                                     axis.text.x = element_text(angle = 45))) 
->>>>>>> a8b29a64efc02994cc028aa44ce23871c9661d52
 
 
 
@@ -479,7 +444,6 @@ p.TSF.l2 <-EVG.L2.df %>% ggplot() +
 
 
 map.time_since <- ggarrange(ggplot( ) + 
-<<<<<<< HEAD
                                geom_spatraster(data = time_since.cm ) + 
                                paletteer::  scale_fill_paletteer_c("grDevices::Purple-Yellow", na.value='transparent') +
                                theme_minimal() +
@@ -488,22 +452,12 @@ map.time_since <- ggarrange(ggplot( ) +
                                theme(text = element_text(size = 20), axis.text.x = element_text(angle = 45),
                                      legend.title =  element_text(size = 18)), labels="a.",
                             font.label=list(size=20))
-=======
-                              geom_spatraster(data = time_since.cm ) + 
-                              paletteer::  scale_fill_paletteer_c("grDevices::Purple-Yellow", na.value='transparent') + theme_minimal() +
-                              geom_sf(data = aoi,  fill = NA, linewidth = 1.25) + theme(legend.title = element_blank())  , 
-                            labels="a.")
->>>>>>> a8b29a64efc02994cc028aa44ce23871c9661d52
 
 
 
 plots <- ggarrange( p.tsf,p.TSF.l2,
-<<<<<<< HEAD
                    ncol=2, nrow=1, labels=c("b.", "c."),
                    font.label=list(size=20))
-=======
-                    ncol=2, nrow=1, labels=c("b.", "c."))
->>>>>>> a8b29a64efc02994cc028aa44ce23871c9661d52
 
 png("FIGURES/TSF_Maps.png", width = 3000, height=3400, res=300)
 ggarrange(map.time_since,plots, ncol=1, nrow=2)
